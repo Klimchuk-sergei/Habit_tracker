@@ -1,44 +1,41 @@
 from django.core.exceptions import ValidationError
 
 def validate_reward_or_related_habit(value):
-    """ Исключаем одновременный выбор связанной привычки и указания вознаграждения. """
-    from habits.models import Habit # импортирую здесь, для исключения циклического импорта.import
-
+    """Исключаем одновременный выбор связанной привычки и указания вознаграждения"""
     if value.reward and value.related_habit:
         raise ValidationError(
-            'нельзя выбирать одновременно связанную привычку и вознаграждение',
-            code='invalid_reward_and_related_habit',
+            'Нельзя одновременно выбирать связанную привычку и вознаграждение.',
+            code='invalid_reward_and_related'
         )
 
 def validate_execution_time(value):
-    """ время на вполнение не более 120 секунд """
+    """Время выполнения должно быть не больше 120 секунд"""
     if value > 120:
         raise ValidationError(
-            'время на выполнение не должно превышать 120 секунд',
-            code='invalid_execution_time',
+            'Время выполнения не может превышать 120 секунд.',
+            code='invalid_execution_time'
         )
 
 def validate_related_habit_is_pleasant(value):
-    """ связаной привычкой, может быть только приятная привычка """
+    """В связанные привычки могут попадать только привычки с признаком приятной привычки"""
     if value and not value.is_pleasant:
         raise ValidationError(
-            'в связаные привчки можно добавить только приятные привычки ',
-            code='invalid_related_habit_is_pleasant'
+            'В связанные привычки можно добавлять только приятные привычки.',
+            code='invalid_related_habit'
         )
 
 def validate_pleasant_habit_no_reward_or_related(value):
-    """ для приятной привычки не может быть вознаграждения или связанной привычки """
+    """У приятной привычки не может быть вознаграждения или связанной привычки"""
     if value.is_pleasant and (value.reward or value.related_habit):
         raise ValidationError(
-            'для приятной привычки не может быть вознаграждения или связанной привычки',
-            code='invalid_pleasant_habit_no_reward_or_related'
+            'У приятной привычки не может быть вознаграждения или связанной привычки.',
+            code='invalid_pleasant_habit'
         )
 
 def validate_frequency(value):
-    """Нельзя выполнять привычку реже, чем 1 ра в 7 дней"""
+    """Нельзя выполнять привычку реже, чем 1 раз в 7 дней"""
     if value < 1 or value > 7:
         raise ValidationError(
-            'период выполнения привычки должен быть от 1 до 7 дней',
+            'Периодичность выполнения привычки должна быть от 1 до 7 дней.',
             code='invalid_frequency'
         )
-
