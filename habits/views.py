@@ -20,6 +20,10 @@ class HabitViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Для спискка используем простой сериализатор
+        return Habit.objects.filter(user=self.request.user)
+
+    def get_serializer_class(self):
+        # Для списка используем упрощенный сериализатор
         if self.action == 'list':
             return HabitListSerializer
         return HabitSerializer
