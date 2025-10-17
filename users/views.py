@@ -1,7 +1,8 @@
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from .serializers import UserSerializer, UserRegistrationSerializer
+from .serializers import UserSerializer, UserRegistrationSerializer, ProfileSerializer
+from rest_framework.decorators import api_view, permission_classes
 
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
@@ -20,3 +21,19 @@ class UserRegistrationView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED
         )
 
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def update_telegram_chat_id(request):
+    """Эндпоинт для обновления telegram_chat_id"""
+    profile = request.user.profile
+    serializer = ProfileSerializer(profile, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(
+            {"message": "Telegram Chat ID успешно обновлен", "data": serializer.data},
+            status=status.HTTP_200_OK
+        )
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
