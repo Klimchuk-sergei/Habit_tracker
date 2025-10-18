@@ -21,7 +21,7 @@ def validate_execution_time(value):
 
 def validate_related_habit_is_pleasant(value):
     """В связанные привычки могут попадать только привычки с признаком приятной привычки"""
-    if value and not value.is_pleasant:
+    if value.related_habit and not value.related_habit.is_pleasant:
         raise ValidationError(
             "В связанные привычки можно добавлять только приятные привычки.",
             code="invalid_related_habit",

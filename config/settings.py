@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 from dotenv import load_dotenv
 
 load_dotenv()  # Загружаем переменные из файла .env
@@ -143,3 +144,10 @@ SIMPLE_JWT = {
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = TIME_ZONE
+
+CELERY_BEAT_SCHEDULE = {
+    'check-habits-every-5-minutes': {
+        'task': 'bot.tasks.check_habits_reminders',
+        'schedule': crontab(minute='*/5'),  # Каждые 5 минут (для теста)
+    },
+}
