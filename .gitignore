@@ -150,7 +150,7 @@ venv.bak/
 # mkdocs documentation
 /site
 
-# mypy
+# mypy.ini
 .mypy_cache/
 .dmypy.json
 dmypy.json
@@ -352,7 +352,7 @@ fabric.properties
 
 # mkdocs documentation
 
-# mypy
+# mypy.ini
 
 # Pyre type checker
 

@@ -1,21 +1,25 @@
-from django.shortcuts import render
-from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import permissions, viewsets
+
 from .models import Habit
-from .serializers import HabitSerializer, HabitListSerializer, PublicHabitSerializer
+from .serializers import HabitListSerializer, HabitSerializer, PublicHabitSerializer
 
 
 class IsOwner(permissions.BasePermission):
-    """ Permission для проверки пользователя на владельца """
+    """Permission для проверки пользователя на владельца"""
 
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user
 
 
 class HabitViewSet(viewsets.ModelViewSet):
-    """ Views для привычек текущего пользователя """
+    """Views для привычек текущего пользователя"""
+
     serializer_class = HabitSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwner, ]
+    permission_classes = [
+        permissions.IsAuthenticated,
+        IsOwner,
+    ]
     filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
@@ -24,7 +28,7 @@ class HabitViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         # Для списка используем упрощенный сериализатор
-        if self.action == 'list':
+        if self.action == "list":
             return HabitListSerializer
         return HabitSerializer
 
@@ -34,7 +38,8 @@ class HabitViewSet(viewsets.ModelViewSet):
 
 
 class PublicHabitViewSet(viewsets.ReadOnlyModelViewSet):
-    """ Views для публичных привычек """
+    """Views для публичных привычек"""
+
     queryset = Habit.objects.filter(is_public=True)
     serializer_class = PublicHabitSerializer
     filter_backends = [DjangoFilterBackend]

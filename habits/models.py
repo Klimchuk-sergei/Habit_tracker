@@ -1,12 +1,14 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
+
 from .validators import (
-    validate_reward_or_related_habit,
     validate_execution_time,
-    validate_related_habit_is_pleasant,
+    validate_frequency,
     validate_pleasant_habit_no_reward_or_related,
-    validate_frequency
+    validate_related_habit_is_pleasant,
+    validate_reward_or_related_habit,
 )
+
 
 class Habit(models.Model):
     # Периодичность по умолчанию ежедневная
@@ -14,20 +16,37 @@ class Habit(models.Model):
     WEEKLY = 7
 
     PERIODICITY_CHOICES = [
-        (DAILY, 'Ежедневно'),
-        (WEEKLY, 'Еженедельно'),
+        (DAILY, "Ежедневно"),
+        (WEEKLY, "Еженедельно"),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='пользователь')
-    place = models.CharField(max_length=255, verbose_name='место')
-    time = models.TimeField(verbose_name='время')
-    action = models.CharField(max_length=255, verbose_name='действие')
-    is_pleasant = models.BooleanField(default=False, verbose_name='признак приятной привычки')
-    related_habit = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='связанная привычка')
-    frequency = models.PositiveSmallIntegerField(choices=PERIODICITY_CHOICES, default=DAILY, verbose_name='периодичность', validators=[validate_frequency])
-    reward = models.CharField(max_length=255, blank=True, verbose_name='вознаграждение')
-    execution_time = models.PositiveSmallIntegerField(verbose_name='время выполнения в секундах', validators=[validate_execution_time])
-    is_public = models.BooleanField(default=False, verbose_name='признак публичности')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="пользователь"
+    )
+    place = models.CharField(max_length=255, verbose_name="место")
+    time = models.TimeField(verbose_name="время")
+    action = models.CharField(max_length=255, verbose_name="действие")
+    is_pleasant = models.BooleanField(
+        default=False, verbose_name="признак приятной привычки"
+    )
+    related_habit = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="связанная привычка",
+    )
+    frequency = models.PositiveSmallIntegerField(
+        choices=PERIODICITY_CHOICES,
+        default=DAILY,
+        verbose_name="периодичность",
+        validators=[validate_frequency],
+    )
+    reward = models.CharField(max_length=255, blank=True, verbose_name="вознаграждение")
+    execution_time = models.PositiveSmallIntegerField(
+        verbose_name="время выполнения в секундах", validators=[validate_execution_time]
+    )
+    is_public = models.BooleanField(default=False, verbose_name="признак публичности")
 
     def clean(self):
         """Вызов всех валидаторов при сохранении модели"""
@@ -44,6 +63,5 @@ class Habit(models.Model):
         return f"Я буду {self.action} в {self.time} в {self.place}"
 
     class Meta:
-        verbose_name = 'привычка'
-        verbose_name_plural = 'привычки'
-
+        verbose_name = "привычка"
+        verbose_name_plural = "привычки"
