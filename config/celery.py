@@ -12,12 +12,12 @@ app.autodiscover_tasks()
 
 # Добавляем периодические задачи
 app.conf.beat_schedule = {
-    'check-habits-every-minute': {
-        'task': 'bot.tasks.check_habits_reminders',
-        'schedule': 60.0,  # каждую минуту
+    "check-habits-every-minute": {
+        "task": "bot.tasks.check_habits_reminders",
+        "schedule": 60.0,  # каждую минуту
     },
-    'test-celery-every-5-minutes': {
-        'task': 'bot.tasks.test_celery',
-        'schedule': 300.0,  # каждые 5 минут
+    "test-celery-every-5-minutes": {
+        "task": "bot.tasks.test_celery",
+        "schedule": 300.0,  # каждые 5 минут
     },
 }

@@ -14,7 +14,9 @@ class HabitSerializer(serializers.ModelSerializer):
     def validate_execution_time(self, value):
         """Валидация времени выполнения"""
         if value > 120:
-            raise serializers.ValidationError("Время выполнения не может превышать 120 секунд.")
+            raise serializers.ValidationError(
+                "Время выполнения не может превышать 120 секунд."
+            )
         return value
 
 
@@ -37,7 +39,7 @@ class HabitListSerializer(serializers.ModelSerializer):
 class PublicHabitSerializer(serializers.ModelSerializer):
     """Сериализатор для публичных привычек (только для чтения)"""
 
-    user = serializers.CharField(source='user.username', read_only=True)
+    user = serializers.CharField(source="user.username", read_only=True)
 
     class Meta:
         model = Habit
@@ -49,6 +51,6 @@ class PublicHabitSerializer(serializers.ModelSerializer):
             "action",
             "frequency",
             "execution_time",
-            "is_public"
+            "is_public",
         )
         read_only_fields = fields

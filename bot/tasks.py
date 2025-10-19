@@ -3,7 +3,6 @@ import requests
 from celery import shared_task
 from habits.models import Habit
 from django.utils import timezone
-from datetime import datetime, timedelta
 
 
 @shared_task
@@ -41,7 +40,7 @@ def send_telegram_message(chat_id, message):
 
 @shared_task
 def check_habits_reminders():  # ИСПРАВЛЕНО название
-    """ проверяем привычки и отправляем напоминания """
+    """проверяем привычки и отправляем напоминания"""
 
     now = timezone.now()
     current_time = now.time()
@@ -56,19 +55,23 @@ def check_habits_reminders():  # ИСПРАВЛЕНО название
     for habit in habits:
         habit_time = habit.time
         # Проверяем совпадение времени (с допуском ±5 минут)
-        if (abs(habit_time.hour - current_hour) == 0 and
-                abs(habit_time.minute - current_minute) <= 5):
+        if (
+            abs(habit_time.hour - current_hour) == 0
+            and abs(habit_time.minute - current_minute) <= 5
+        ):
 
             # проверяем пользователя на наличие ТГ ID
-            if hasattr(habit.user, 'profile') and habit.user.profile.telegram_chat_id:
+            if hasattr(habit.user, "profile") and habit.user.profile.telegram_chat_id:
                 chat_id = habit.user.profile.telegram_chat_id
 
                 # создаем сообщение - ИСПРАВЛЕНО: habit.action вместо habits.action
-                message = f"🔔 Напоминание о привычке!\n\n" \
-                          f"💫 Действие: {habit.action}\n" \
-                          f"📍 Место: {habit.place}\n" \
-                          f"⏰ Время: {habit.time}\n" \
-                          f"⏱️ Время на выполнение: {habit.execution_time} сек."
+                message = (
+                    f"🔔 Напоминание о привычке!\n\n"
+                    f"💫 Действие: {habit.action}\n"
+                    f"📍 Место: {habit.place}\n"
+                    f"⏰ Время: {habit.time}\n"
+                    f"⏱️ Время на выполнение: {habit.execution_time} сек."
+                )
 
                 if habit.reward:
                     message += f"\n🎁 Вознаграждение: {habit.reward}"
@@ -78,7 +81,9 @@ def check_habits_reminders():  # ИСПРАВЛЕНО название
                 # отправляем сообщение
                 send_telegram_message.delay(chat_id, message)
                 habits_sent += 1
-                print(f"📤 Отправлено напоминание для {habit.user.username}: {habit.action}")
+                print(
+                    f"📤 Отправлено напоминание для {habit.user.username}: {habit.action}"
+                )
 
     print(f"✅ Проверка завершена. Отправлено напоминаний: {habits_sent}")
     return f"проверено {habits.count()} привычек, отправлено {habits_sent} напоминаний"

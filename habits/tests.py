@@ -10,9 +10,7 @@ from django.core.exceptions import ValidationError
 class HabitModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123',
-            email='test@example.com'
+            username="testuser", password="testpass123", email="test@example.com"
         )
         self.pleasant_habit = Habit.objects.create(
             user=self.user,
@@ -22,7 +20,7 @@ class HabitModelTest(TestCase):
             is_pleasant=True,
             frequency=1,
             execution_time=120,
-            is_public=True
+            is_public=True,
         )
 
     def test_habit_creation(self):
@@ -36,11 +34,13 @@ class HabitModelTest(TestCase):
             frequency=1,
             execution_time=120,
             is_public=True,
-            related_habit=self.pleasant_habit
+            related_habit=self.pleasant_habit,
         )
         self.assertEqual(habit.action, "Читать книгу")
         self.assertEqual(habit.user.username, "testuser")
-        self.assertEqual(str(habit), f"Я буду {habit.action} в {habit.time} в {habit.place}")
+        self.assertEqual(
+            str(habit), f"Я буду {habit.action} в {habit.time} в {habit.place}"
+        )
 
     def test_habit_with_reward(self):
         """Тест привычки с вознаграждением"""
@@ -53,7 +53,7 @@ class HabitModelTest(TestCase):
             frequency=1,
             execution_time=60,
             is_public=False,
-            reward="Выпить кофе"
+            reward="Выпить кофе",
         )
         self.assertEqual(habit.reward, "Выпить кофе")
 
@@ -61,12 +61,10 @@ class HabitModelTest(TestCase):
 class HabitAPITest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123'
+            username="testuser", password="testpass123"
         )
         self.other_user = User.objects.create_user(
-            username='otheruser',
-            password='testpass123'
+            username="otheruser", password="testpass123"
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
@@ -79,7 +77,7 @@ class HabitAPITest(APITestCase):
             is_pleasant=False,
             frequency=1,
             execution_time=120,
-            is_public=True
+            is_public=True,
         )
 
         self.private_habit = Habit.objects.create(
@@ -90,15 +88,15 @@ class HabitAPITest(APITestCase):
             is_pleasant=False,
             frequency=1,
             execution_time=90,
-            is_public=False
+            is_public=False,
         )
 
     def test_get_habits_list(self):
         """Тест получения списка привычек"""
-        response = self.client.get('/api/habits/my-habits/')
+        response = self.client.get("/api/habits/my-habits/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 2)
-        self.assertEqual(response.data['count'], 2)
+        self.assertEqual(len(response.data["results"]), 2)
+        self.assertEqual(response.data["count"], 2)
 
     def test_create_habit(self):
         """Тест создания привычки через API"""
@@ -109,18 +107,18 @@ class HabitAPITest(APITestCase):
             "is_pleasant": False,
             "frequency": 1,
             "execution_time": 120,
-            "is_public": True
+            "is_public": True,
         }
-        response = self.client.post('/api/habits/my-habits/', data)
+        response = self.client.post("/api/habits/my-habits/", data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Habit.objects.count(), 3)
-        self.assertEqual(response.data['action'], "Гулять")
+        self.assertEqual(response.data["action"], "Гулять")
 
     def test_get_habit_detail(self):
         """Тест получения деталей привычки"""
-        response = self.client.get(f'/api/habits/my-habits/{self.habit.id}/')
+        response = self.client.get(f"/api/habits/my-habits/{self.habit.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['action'], "Тестовая привычка")
+        self.assertEqual(response.data["action"], "Тестовая привычка")
 
     def test_update_habit(self):
         """Тест обновления привычки"""
@@ -131,34 +129,34 @@ class HabitAPITest(APITestCase):
             "is_pleasant": False,
             "frequency": 1,
             "execution_time": 120,
-            "is_public": True
+            "is_public": True,
         }
-        response = self.client.put(f'/api/habits/my-habits/{self.habit.id}/', data)
+        response = self.client.put(f"/api/habits/my-habits/{self.habit.id}/", data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.habit.refresh_from_db()
         self.assertEqual(self.habit.place, "Библиотека")
 
     def test_delete_habit(self):
         """Тест удаления привычки"""
-        response = self.client.delete(f'/api/habits/my-habits/{self.habit.id}/')
+        response = self.client.delete(f"/api/habits/my-habits/{self.habit.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Habit.objects.count(), 1)
 
     def test_public_habits_access(self):
         """Тест доступа к публичным привычкам"""
-        response = self.client.get('/api/habits/public-habits/')
+        response = self.client.get("/api/habits/public-habits/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Проверяем что все возвращенные привычки публичные
-        if response.data['results']:
-            for habit in response.data['results']:
-                self.assertTrue(habit.get('is_public', False))
+        if response.data["results"]:
+            for habit in response.data["results"]:
+                self.assertTrue(habit.get("is_public", False))
 
     def test_other_user_cannot_access_private_habits(self):
         """Тест что другой пользователь не видит приватные привычки"""
         self.client.force_authenticate(user=self.other_user)
-        response = self.client.get('/api/habits/my-habits/')
+        response = self.client.get("/api/habits/my-habits/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 0)
+        self.assertEqual(len(response.data["results"]), 0)
 
 
 class HabitValidatorTest(TestCase):
@@ -190,12 +188,10 @@ class HabitValidatorTest(TestCase):
 class PermissionTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123'
+            username="testuser", password="testpass123"
         )
         self.other_user = User.objects.create_user(
-            username='otheruser',
-            password='testpass123'
+            username="otheruser", password="testpass123"
         )
         self.habit = Habit.objects.create(
             user=self.user,
@@ -205,27 +201,26 @@ class PermissionTest(APITestCase):
             is_pleasant=False,
             frequency=1,
             execution_time=120,
-            is_public=False
+            is_public=False,
         )
 
     def test_owner_can_access(self):
         """Тест что владелец может доступть свою привычку"""
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/habits/my-habits/{self.habit.id}/')
+        response = self.client.get(f"/api/habits/my-habits/{self.habit.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_other_user_cannot_access(self):
         """Тест что другой пользователь не может доступть чужую привычку"""
         self.client.force_authenticate(user=self.other_user)
-        response = self.client.get(f'/api/habits/my-habits/{self.habit.id}/')
+        response = self.client.get(f"/api/habits/my-habits/{self.habit.id}/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class HabitValidatorIntegrationTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123'
+            username="testuser", password="testpass123"
         )
         self.pleasant_habit = Habit.objects.create(
             user=self.user,
@@ -235,7 +230,7 @@ class HabitValidatorIntegrationTest(TestCase):
             is_pleasant=True,
             frequency=1,
             execution_time=120,
-            is_public=True
+            is_public=True,
         )
 
     def test_pleasant_habit_cannot_have_reward(self):
@@ -249,7 +244,7 @@ class HabitValidatorIntegrationTest(TestCase):
             frequency=1,
             execution_time=120,
             is_public=False,
-            reward="Что-то"  # Не должно быть у приятной привычки
+            reward="Что-то",  # Не должно быть у приятной привычки
         )
         with self.assertRaises(ValidationError):
             habit.full_clean()
@@ -266,7 +261,7 @@ class HabitValidatorIntegrationTest(TestCase):
             execution_time=120,
             is_public=True,
             reward="Отдохнуть",
-            related_habit=self.pleasant_habit  # Нельзя одновременно с reward
+            related_habit=self.pleasant_habit,  # Нельзя одновременно с reward
         )
         with self.assertRaises(ValidationError):
             habit.full_clean()
@@ -282,7 +277,7 @@ class HabitValidatorIntegrationTest(TestCase):
             is_pleasant=False,
             frequency=1,
             execution_time=120,
-            is_public=True
+            is_public=True,
         )
 
         habit = Habit(
@@ -294,7 +289,7 @@ class HabitValidatorIntegrationTest(TestCase):
             frequency=1,
             execution_time=120,
             is_public=True,
-            related_habit=not_pleasant_habit  # Ошибка - не приятная привычка
+            related_habit=not_pleasant_habit,  # Ошибка - не приятная привычка
         )
         with self.assertRaises(ValidationError):
             habit.full_clean()
@@ -303,8 +298,7 @@ class HabitValidatorIntegrationTest(TestCase):
 class PaginationTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123'
+            username="testuser", password="testpass123"
         )
         self.client.force_authenticate(user=self.user)
 
@@ -318,29 +312,30 @@ class PaginationTest(APITestCase):
                 is_pleasant=False,
                 frequency=1,
                 execution_time=120,
-                is_public=True
+                is_public=True,
             )
 
     def test_pagination(self):
         """Тест пагинации (5 привычек на страницу)"""
-        response = self.client.get('/api/habits/my-habits/')
+        response = self.client.get("/api/habits/my-habits/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 5)  # Первая страница
-        self.assertEqual(response.data['count'], 7)  # Всего привычек
-        self.assertIsNotNone(response.data.get('next'))  # Должна быть следующая страница
+        self.assertEqual(len(response.data["results"]), 5)  # Первая страница
+        self.assertEqual(response.data["count"], 7)  # Всего привычек
+        self.assertIsNotNone(
+            response.data.get("next")
+        )  # Должна быть следующая страница
 
     def test_second_page(self):
         """Тест второй страницы пагинации"""
-        response = self.client.get('/api/habits/my-habits/?page=2')
+        response = self.client.get("/api/habits/my-habits/?page=2")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 2)  # Оставшиеся 2 привычки
+        self.assertEqual(len(response.data["results"]), 2)  # Оставшиеся 2 привычки
 
 
 class ValidatorEdgeCasesTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            username='testuser',
-            password='testpass123'
+            username="testuser", password="testpass123"
         )
 
     def test_pleasant_habit_with_related_habit(self):
@@ -353,7 +348,7 @@ class ValidatorEdgeCasesTest(TestCase):
             is_pleasant=True,
             frequency=1,
             execution_time=120,
-            is_public=True
+            is_public=True,
         )
         pleasant_habit1.save()
 
@@ -366,7 +361,7 @@ class ValidatorEdgeCasesTest(TestCase):
             frequency=1,
             execution_time=120,
             is_public=False,
-            related_habit=pleasant_habit1  # Ошибка - приятная привычка не может иметь связанную
+            related_habit=pleasant_habit1,  # Ошибка - приятная привычка не может иметь связанную
         )
         with self.assertRaises(ValidationError):
             pleasant_habit2.full_clean()
