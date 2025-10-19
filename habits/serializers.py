@@ -35,8 +35,19 @@ class HabitListSerializer(serializers.ModelSerializer):
 
 
 class PublicHabitSerializer(serializers.ModelSerializer):
-    """Сериализатор публичных привычек(только чтение)"""
+    """Сериализатор для публичных привычек (только для чтения)"""
+
+    user = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
         model = Habit
-        fields = ("id", "place", "time", "action", "frequency")
+        fields = (
+            "id",
+            "user",
+            "place",
+            "time",
+            "action",
+            "frequency",
+            "execution_time"
+        )
+        read_only_fields = fields

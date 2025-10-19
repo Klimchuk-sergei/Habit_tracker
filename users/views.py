@@ -7,6 +7,11 @@ from .serializers import ProfileSerializer, UserRegistrationSerializer, UserSeri
 
 
 class UserRegistrationView(generics.CreateAPIView):
+    """
+        Регистрация нового пользователя.
+
+        При успешной регистрации возвращает данные пользователя.
+        """
     serializer_class = UserRegistrationSerializer
     queryset = User.objects.all()
     permission_classes = [permissions.AllowAny]

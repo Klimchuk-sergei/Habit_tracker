@@ -13,7 +13,27 @@ class IsOwner(permissions.BasePermission):
 
 
 class HabitViewSet(viewsets.ModelViewSet):
-    """Views для привычек текущего пользователя"""
+    """
+    API эндпоинт для управления привычками текущего пользователя.
+
+    list:
+    Возвращает список привычек текущего пользователя с пагинацией.
+
+    create:
+    Создает новую привычку для текущего пользователя.
+
+    retrieve:
+    Возвращает детальную информацию о привычке.
+
+    update:
+    Обновляет информацию о привычке.
+
+    partial_update:
+    Частично обновляет информацию о привычке.
+
+    destroy:
+    Удаляет привычку.
+    """
 
     serializer_class = HabitSerializer
     permission_classes = [
@@ -38,7 +58,15 @@ class HabitViewSet(viewsets.ModelViewSet):
 
 
 class PublicHabitViewSet(viewsets.ReadOnlyModelViewSet):
-    """Views для публичных привычек"""
+    """
+    API эндпоинт для просмотра публичных привычек.
+
+    list:
+    Возвращает список всех публичных привычек.
+
+    retrieve:
+    Возвращает детальную информацию о публичной привычке.
+    """
 
     queryset = Habit.objects.filter(is_public=True)
     serializer_class = PublicHabitSerializer
