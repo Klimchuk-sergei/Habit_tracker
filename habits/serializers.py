@@ -48,6 +48,7 @@ class PublicHabitSerializer(serializers.ModelSerializer):
             "time",
             "action",
             "frequency",
-            "execution_time"
+            "execution_time",
+            "is_public"
         )
         read_only_fields = fields
