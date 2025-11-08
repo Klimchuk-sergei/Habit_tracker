@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import include, path, re_path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -18,7 +19,22 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
+
+def home_view(request):
+    return HttpResponse("""
+    <h1>Habit Tracker API</h1>
+    <p>Добро пожаловать в API трекера привычек!</p>
+    <ul>
+        <li><a href="/admin/">Админка</a></li>
+        <li><a href="/swagger/">Swagger документация</a></li>
+        <li><a href="/api/habits/">API привычек</a></li>
+        <li><a href="/api/auth/">API аутентификации</a></li>
+    </ul>
+    """)
+
+
 urlpatterns = [
+    path("", home_view, name="home"),
     path("admin/", admin.site.urls),
     path("api/habits/", include("habits.urls")),
     path("api/auth/", include("users.urls")),

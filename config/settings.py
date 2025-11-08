@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()  # Загружаем переменные из файла .env
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-your-default-secret-key-for-dev")
-DEBUG = os.getenv("DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost 127.0.0.1").split(" ")
+DEBUG = os.getenv("DEBUG", "False") == "True"
+ALLOWED_HOSTS = ['89.169.189.185', 'localhost', '127.0.0.1', 'web', 'nginx', '0.0.0.0']
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -151,3 +151,23 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute="*/5"),  # Каждые 5 минут (для теста)
     },
 }
+
+# Настройки для Swagger - отключаем Django аутентификацию
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False,  # Отключаем Django session auth
+    'LOGIN_URL': '/admin/login/',  # Перенаправляем на админку если нужен логин
+    'LOGOUT_URL': '/admin/logout/',
+}
+
+# Настройки для Redoc
+REDOC_SETTINGS = {
+    'LAZY_RENDERING': False,
+}
+
