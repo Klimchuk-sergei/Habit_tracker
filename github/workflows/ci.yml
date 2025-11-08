@@ -55,7 +55,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /home/natalia/habittracker
+            cd /home/ubuntu/habittracker
             git pull
             docker compose down
             docker compose up -d --build

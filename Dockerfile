@@ -10,6 +10,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
+COPY .env .
+
 # Установка setuptools для решения проблем с зависимостями
 RUN pip install setuptools==75.8.0
 
