@@ -10,40 +10,10 @@ jobs:
 
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      POSTGRES_DB: test_db
-      POSTGRES_USER: test_user
-      POSTGRES_PASSWORD: test_pass
-      REDIS_URL: redis://redis:6379/0
-      # Добавьте эти переменные для тестов
-      DB_HOST: localhost
-      DB_PORT: 5432
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_pass
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Python 3.12
         uses: actions/setup-python@v4
@@ -53,25 +23,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Wait for PostgreSQL
-        run: |
-          until pg_isready -h localhost -p 5432; do
-            echo "Waiting for PostgreSQL..."
-            sleep 2
-          done
-
-      - name: Run migrations
-        run: python manage.py migrate
-        env:
-          DATABASE_URL: postgres://test_user:test_pass@localhost:5432/test_db
-
-      - name: Lint
+      - name: Lint with flake8
         run: flake8 .
 
-      - name: Test
+      - name: Run tests
         run: python manage.py test
-        env:
-          DATABASE_URL: postgres://test_user:test_pass@localhost:5432/test_db
 
       - name: Build Docker images
         run: docker compose build
@@ -84,6 +40,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /home/ubuntu/habittracker
-            git pull
+            git pull origin main
             docker compose down
             docker compose up -d --build
+            echo "🚀 Deployment completed successfully!"
