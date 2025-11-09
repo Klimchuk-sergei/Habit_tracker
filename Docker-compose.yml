@@ -1,0 +1,123 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: habittracker_postgres
+    environment:
+      POSTGRES_DB: habit_tracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2000
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  redis:
+    image: redis:alpine
+    container_name: habittracker_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  web:
+    build: .
+    container_name: habittracker_web
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --timeout 120"
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: 'django-insecure-8i02q5!r)^t6dnk4t1p^tu+i@85g00x19v9kn&5-u$ifidr+3s'
+      DEBUG: 'True'
+      ALLOWED_HOSTS: 'localhost 127.0.0.1 web nginx 0.0.0.0'
+      DB_NAME: habit_tracker
+      DB_USER: postgres
+      DB_PASSWORD: 2000
+      DB_HOST: db
+      DB_PORT: 5432
+      TIMEZONE: Europe/Moscow
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      TELEGRAM_BOT_TOKEN: 5491919460:AAENs7DHLTWKJcrWODhlDtMVltguHNSB4qY
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app_network
+
+  celery_worker:
+    build: .
+    container_name: habittracker_celery_worker
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      SECRET_KEY: 'django-insecure-8i02q5!r)^t6dnk4t1p^tu+i@85g00x19v9kn&5-u$ifidr+3s'
+      DEBUG: 'True'
+      ALLOWED_HOSTS: 'localhost 127.0.0.1 web nginx 0.0.0.0'
+      DB_NAME: habit_tracker
+      DB_USER: postgres
+      DB_PASSWORD: 2000
+      DB_HOST: db
+      DB_PORT: 5432
+      TIMEZONE: Europe/Moscow
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      TELEGRAM_BOT_TOKEN: 5491919460:AAENs7DHLTWKJcrWODhlDtMVltguHNSB4qY
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app_network
+
+  celery_beat:
+    build: .
+    container_name: habittracker_celery_beat
+    command: celery -A config beat --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      SECRET_KEY: 'django-insecure-8i02q5!r)^t6dnk4t1p^tu+i@85g00x19v9kn&5-u$ifidr+3s'
+      DEBUG: 'True'
+      ALLOWED_HOSTS: 'localhost 127.0.0.1 web nginx 0.0.0.0'
+      DB_NAME: habit_tracker
+      DB_USER: postgres
+      DB_PASSWORD: 2000
+      DB_HOST: db
+      DB_PORT: 5432
+      TIMEZONE: Europe/Moscow
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      TELEGRAM_BOT_TOKEN: 5491919460:AAENs7DHLTWKJcrWODhlDtMVltguHNSB4qY
+    depends_on:
+      - web
+      - celery_worker
+    networks:
+      - app_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: habittracker_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - media_volume:/app/media
+    depends_on:
+      - web
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+  media_volume:
+
+networks:
+  app_network:
+    driver: bridge
